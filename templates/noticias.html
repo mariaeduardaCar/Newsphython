@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Notícias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 p-6 min-h-screen flex flex-col items-center">
+    <div class="w-full max-w-md mx-auto">
+        <!-- Seletor de Categorias -->
+        <div class="flex items-center gap-3 mb-4 bg-white p-2 rounded-full shadow-md border border-gray-300">
+            <select id="categoria" class="flex-1 p-2 text-sm border-none rounded-full bg-gray-100 text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none">
+                <option value="general">Geral</option>
+                <option value="business">Negócios</option>
+                <option value="entertainment">Entretenimento</option>
+                <option value="health">Saúde</option>
+                <option value="science">Ciência</option>
+                <option value="sports">Esportes</option>
+                <option value="technology">Tecnologia</option>
+            </select>
+            <button onclick="carregarNoticias()" 
+                class="bg-blue-600 text-white px-4 py-2 text-sm rounded-full flex items-center gap-2 hover:bg-blue-700 transition">
+                🔍 <span>Buscar</span>
+            </button>
+        </div>
+    </div>
+    
+        <!-- Seção de Notícias -->
+        <h1 class="text-xl font-semibold text-center mb-4">🌎 Últimas Notícias</h1>
+        <div id="noticias" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+
+
+        <!-- Seção de Favoritos -->
+        <h1 class="text-xl font-semibold text-center mt-8 mb-4">⭐ Favoritos</h1>
+        <div id="favoritos" class="grid gap-4"></div>
+    </div>
+ 
+    <script>
+        async function carregarNoticias() {
+            const categoria = document.getElementById('categoria').value;
+            const response = await fetch(`/api/noticias?categoria=${categoria}`);
+            const noticias = await response.json();
+            const container = document.getElementById('noticias');
+            container.innerHTML = '';
+
+            noticias.forEach(noticia => {
+                const div = document.createElement('div');
+                div.classList.add('bg-white', 'p-4', 'rounded', 'border', 'text-gray-900');
+                div.innerHTML = `
+                    <h3 class="text-lg font-medium">${noticia.title}</h3>
+                    <p class="text-gray-700 text-sm mt-1">${noticia.description || 'Sem descrição disponível'}</p>
+                    <div class="flex justify-between items-center mt-3">
+                        <a href="${noticia.url}" target="_blank" class="text-blue-600 text-sm hover:underline">Leia mais</a>
+                        <button class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700" 
+                            onclick="favoritarNoticia(
+                                '${encodeURIComponent(noticia.title)}', 
+                                '${encodeURIComponent(noticia.description)}', 
+                                '${encodeURIComponent(noticia.url)}', 
+                                '${encodeURIComponent(noticia.source.name)}'
+                            )">
+                            ⭐ Favoritar
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function favoritarNoticia(titulo, descricao, url, fonte) {
+            titulo = decodeURIComponent(titulo);
+            descricao = decodeURIComponent(descricao);
+            url = decodeURIComponent(url);
+            fonte = decodeURIComponent(fonte);
+
+            await fetch('/favoritar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ titulo, descricao, url, fonte })
+            });
+            carregarFavoritos();
+        }
+
+        async function carregarFavoritos() {
+            const response = await fetch('/favoritos');
+            const favoritos = await response.json();
+            const container = document.getElementById('favoritos');
+            container.innerHTML = '';
+
+            favoritos.forEach(artigo => {
+                const div = document.createElement('div');
+                div.classList.add('bg-white', 'p-4', 'rounded', 'border', 'text-gray-900');
+                div.innerHTML = `
+                    <h3 class="text-lg font-medium">${artigo.titulo}</h3>
+                    <p class="text-gray-700 text-sm mt-1">${artigo.descricao || 'Sem descrição disponível'}</p>
+                    <a href="${artigo.url}" target="_blank" class="text-blue-600 text-sm hover:underline mt-2 block">Leia mais</a>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        async function logout() {
+        const response = await fetch('/logout', { method: 'GET' });
+        const data = await response.json();
+        
+        if (data.mensagem) {
+            // Exibir mensagem de sucesso ou fazer o redirecionamento
+            alert(data.mensagem); // Mensagem que você retornou do backend
+            // Aqui você pode redirecionar para a página de login ou para a home, por exemplo:
+            window.location.href = '/'; // Altere conforme sua necessidade
+        }
+    }
+
+        carregarNoticias();
+        carregarFavoritos();
+    </script>
+
+</body>
+</html>
