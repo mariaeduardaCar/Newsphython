@@ -14,12 +14,14 @@ load_dotenv()
 app = Flask(__name__)
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+print("DATABASE_URL:", DATABASE_URL)  # Adiciona esta linha para depuração
 
 # Converte postgres:// para postgresql:// se necessário
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+
 
 
 # Configuração do Banco de Dados
