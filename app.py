@@ -60,10 +60,11 @@ def load_user(user_id):
 def index():
     return render_template("index.html")
 
-# Rota de login com o Google
 @app.route("/login/google")
 def login_google():
-    return google.authorize_redirect(url_for('google_authorized', _external=True), prompt="consent")
+    redirect_uri = url_for('google_authorized', _external=True, _scheme='https')  # Força HTTPS
+    return google.authorize_redirect(redirect_uri, prompt="consent")
+
 
 # Rota de callback após o login com o Google
 @app.route("/login/google/callback")
