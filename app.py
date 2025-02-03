@@ -62,8 +62,11 @@ def index():
 
 @app.route("/login/google")
 def login_google():
-    redirect_uri = url_for('google_authorized', _external=True, _scheme='https')  # Força HTTPS
-    return google.authorize_redirect(redirect_uri, prompt="consent")
+    return google.authorize_redirect(
+        url_for('google_authorized', _external=True, _scheme='https'), 
+        prompt="consent"
+    )
+
 
 
 # Rota de callback após o login com o Google
