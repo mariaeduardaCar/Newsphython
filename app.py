@@ -6,11 +6,21 @@ from models import db, Usuario, bcrypt, Artigos,Favoritos
 from config import DATABASE_URL, SECRET_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEWS_API_KEY, BASE_URL
 from dotenv import load_dotenv
 import requests
+import os
 
 # Carrega as variáveis do arquivo .env
 load_dotenv()
 
 app = Flask(__name__)
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Converte postgres:// para postgresql:// se necessário
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+
 
 # Configuração do Banco de Dados
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
