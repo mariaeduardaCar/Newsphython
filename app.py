@@ -63,10 +63,9 @@ def index():
 @app.route("/login/google")
 def login_google():
     return google.authorize_redirect(
-        url_for('google_authorized', _external=True, _scheme='https'), 
+        "https://noticiapy-c56c09c99dac.herokuapp.com/login/google/callback", 
         prompt="consent"
     )
-
 
 
 # Rota de callback após o login com o Google
